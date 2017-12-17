@@ -1,3 +1,6 @@
+FROM ruby:2.4.3-slim-stretch as compiled-ruby
+RUN find / -name *libyaml*
+
 FROM debian:stretch
 MAINTAINER ixkaito <ixkaito@gmail.com>
 
@@ -7,6 +10,7 @@ RUN apt-get update \
     ca-certificates \
     curl \
     less \
+    libyaml-0-2 \
     mysql-server \
     mysql-client \
     nginx \
@@ -18,15 +22,22 @@ RUN apt-get update \
     php7.0-gd \
     php7.0-mysql \
     php7.0-xdebug \
-    ruby \
     supervisor \
     vim \
   && rm -rf /var/lib/apt/lists/*
 
 #
+# Copy Ruby and Gem binary
+#
+WORKDIR /usr/local/bin/
+COPY --from=compiled-ruby /usr/local/lib/ /usr/local/lib/
+COPY --from=compiled-ruby /usr/local/bin/ruby ruby
+COPY --from=compiled-ruby /usr/local/bin/gem gem
+
+#
 # Install Gems
 #
-RUN gem install wordmove -v 2.0.0
+RUN gem install wordmove
 
 #
 # Install Mailhog
