@@ -1,7 +1,7 @@
 FROM ruby:2.4.3-slim-stretch as compiled-ruby
 RUN find / -name *libyaml*
 
-FROM debian:stretch
+FROM debian:stretch-slim
 MAINTAINER ixkaito <ixkaito@gmail.com>
 
 RUN apt-get update \
