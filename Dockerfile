@@ -55,28 +55,31 @@ RUN sed -i -e 's/file) cmd="$cmd >> "`shell_quote_string "$err_log"`" 2>\&1" ;;/
 # nginx settings
 #
 RUN adduser --uid 1000 --gecos '' --disabled-password wocker
-RUN sed -i -e "s#root /var/www/html;#root /var/www/wordpress/;#" /etc/nginx/sites-available/default \
-  && sed -i -e "s/index index.html/index index.php index.html/" /etc/nginx/sites-available/default \
-  && sed -i -e "/location.*php/,/}/ s/#//" /etc/nginx/sites-available/default \
-  && sed -i -e "/# With php-cgi.*/,/}/ s/fastcgi.*//" /etc/nginx/sites-available/default \
-  && sed -i -e "s/server_name _;/server_name localhost;/" /etc/nginx/sites-available/default \
-  && sed -i -e "s/user www-data/user wocker/" /etc/nginx/nginx.conf
+WORKDIR /etc/nginx/
+RUN sed -i -e "s#root /var/www/html;#root /var/www/wordpress/;#" sites-available/default \
+  && sed -i -e "s/index index.html/index index.php index.html/" sites-available/default \
+  && sed -i -e "/location.*php/,/}/ s/#//" sites-available/default \
+  && sed -i -e "/# With php-cgi.*/,/}/ s/fastcgi.*//" sites-available/default \
+  && sed -i -e "s/server_name _;/server_name localhost;/" sites-available/default \
+  && sed -i -e "s/user www-data/user wocker/" nginx.conf
 
 #
 # php-fpm settings
 #
-RUN sed -i -e "s/^user =.*/user = wocker/" /etc/php/7.0/fpm/pool.d/www.conf \
-  && sed -i -e "s/^group = .*/group = wocker/" /etc/php/7.0/fpm/pool.d/www.conf \
-  && sed -i -e "s/^listen.owner =.*/listen.owner = wocker/" /etc/php/7.0/fpm/pool.d/www.conf \
-  && sed -i -e "s/^listen.group =.*/listen.group = wocker/" /etc/php/7.0/fpm/pool.d/www.conf
+WORKDIR /etc/php/7.0/fpm/pool.d/
+RUN sed -i -e "s/^user =.*/user = wocker/" www.conf \
+  && sed -i -e "s/^group = .*/group = wocker/" www.conf \
+  && sed -i -e "s/^listen.owner =.*/listen.owner = wocker/" www.conf \
+  && sed -i -e "s/^listen.group =.*/listen.group = wocker/" www.conf
 
 #
-# php.ini settings and php-fpm service start
+# php.ini settings
 #
-RUN sed -i -e "s/^upload_max_filesize.*/upload_max_filesize = 32M/" /etc/php/7.0/fpm/php.ini \
-  && sed -i -e "s/^post_max_size.*/post_max_size = 64M/" /etc/php/7.0/fpm/php.ini \
-  && sed -i -e "s/^display_errors.*/display_errors = On/" /etc/php/7.0/fpm/php.ini \
-  && sed -i -e "s#^;sendmail_path.*#sendmail_path = /usr/local/bin/mailhog sendmail#" /etc/php/7.0/fpm/php.ini
+WORKDIR /etc/php/7.0/fpm/
+RUN sed -i -e "s/^post_max_size.*/post_max_size = 64M/" php.ini \
+  && sed -i -e "s/^display_errors.*/display_errors = On/" php.ini \
+  && sed -i -e "s#^;sendmail_path.*#sendmail_path = /usr/local/bin/mailhog sendmail#" php.ini \
+  && sed -i -e "s/^upload_max_filesize.*/upload_max_filesize = 32M/" php.ini
 RUN service php7.0-fpm start
 
 #
