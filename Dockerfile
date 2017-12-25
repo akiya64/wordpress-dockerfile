@@ -9,6 +9,7 @@ RUN apt-get update \
     ca-certificates \
     curl \
     less \
+    levee \
     libyaml-0-2 \
     mysql-server \
     mysql-client \
@@ -22,7 +23,6 @@ RUN apt-get update \
     php7.0-mysql \
     php7.0-xdebug \
     supervisor \
-    vim \
   && rm -rf /var/lib/apt/lists/*
 
 #
